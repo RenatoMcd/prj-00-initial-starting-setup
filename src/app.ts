@@ -45,6 +45,42 @@ function autobind(
     return adjDescriptor;
 }
 
+// ProjectList Class
+class ProjectList {
+  templateElement: HTMLTemplateElement;
+  hostElement: HTMLDivElement;
+  element: HTMLElement;
+
+  constructor(private type: 'active' | 'finished') {
+    this.templateElement = document.getElementById(
+      'project-list'
+    )! as HTMLTemplateElement;
+    this.hostElement = document.getElementById('app')! as HTMLDivElement;
+
+    const importedNode = document.importNode(
+      this.templateElement.content,
+      true
+    );
+    this.element = importedNode.firstElementChild as HTMLElement;
+    this.element.id = `${this.type}-projects`;
+
+    this.attach();
+    this.renderContent();
+  }
+
+  private renderContent() {
+    const listId = `${this.type}-projects-list`;
+    this.element.querySelector('ul')!.id = listId;
+    this.element.querySelector('h2')!.textContent = `${this.type.toUpperCase()} PROJECTS`; 
+  }
+
+  private attach() {
+    this.hostElement.insertAdjacentElement('beforeend', this.element);
+  }
+
+  
+}
+
 // ProjectInput Class
 class ProjectInput {
   templateElement: HTMLTemplateElement;
@@ -108,10 +144,21 @@ class ProjectInput {
     }
   }
 
+  private clearInputs() {
+    this.titleInputElement.value = '';
+    this.descriptionInputElement.value = '';
+    this.peopleInputElement.value = '';
+  }
+
   @autobind
   private submitHandler(e: Event) {
     e.preventDefault();
     const UserInput = this.getUserInput();
+    if (Array.isArray(UserInput)) {
+      const [title, description, people] = UserInput;
+      console.log(title, description, people)
+      this.clearInputs();
+    }
   } 
 
   private configure() {
@@ -124,3 +171,5 @@ class ProjectInput {
 }
 
 const prjInput = new ProjectInput();
+const activeProjectList = new ProjectList('active');
+const finishedProjectList = new ProjectList('finished');
